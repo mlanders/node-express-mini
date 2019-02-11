@@ -1,7 +1,9 @@
 const express = require('express');
+const cors = require('cors');
 const db = require('./data/db');
 const server = express();
 server.use(express.json());
+server.use(cors());
 
 server.post('/api/users', (req, res) => {
 	const { name, bio } = req.body;
@@ -20,7 +22,7 @@ server.post('/api/users', (req, res) => {
 					res.status(code).json({ success: false, message: message });
 				});
 		})
-		.catch(({ code, message }) => {
+		.catch(err => {
 			res.status(500).json({
 				success: false,
 				message: 'There was an error while saving the user to the database',
@@ -28,7 +30,7 @@ server.post('/api/users', (req, res) => {
 		});
 });
 
-server.get('/api/users', (req, res) => {
+server.get('/api/users', cors(), (req, res) => {
 	db.find()
 		.then(users => {
 			res.status(200).json({ success: true, users });
@@ -71,7 +73,7 @@ server.delete('/api/users/:id', (req, res) => {
 					.then(deleted => {
 						res.status(200).json({ success: true, user });
 					})
-					.catch(({ code, message }) => {
+					.catch(err => {
 						res.status(500).json({
 							success: false,
 							message: 'The user could not be removed',
