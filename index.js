@@ -61,7 +61,7 @@ server.put('/api/users/:id', (req, res) => {
 	const changes = req.body;
 	db.update(id, changes)
 		.then(updated => {
-			res.status(200).jason({ success: true, updated });
+			res.status(200).json({ success: true, updated });
 		})
 		.catch(({ code, message }) => {
 			res.status(code).json({ success: false, message: message });
