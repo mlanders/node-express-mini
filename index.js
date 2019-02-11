@@ -4,20 +4,21 @@ const server = express();
 server.use(express.json());
 
 server.post('/api/users', (req, res) => {
-	const user = req.body;
-	console.log(user);
-	if (user.name === '' || user.bio === '') {
-		res => {
-			res.status(400).json({
-				success: false,
-				message: 'Please provide name and bio for the user.',
-			});
-		};
+	const { name, bio } = req.body;
+	const newUser = { name, bio };
+	if (!name || !bio) {
+		return res.status(400).json({ errorMessage: 'Please provide name and bio for the user.' });
 	}
-	db.insert(user)
+	db.insert(newUser)
 
 		.then(id => {
-			res.status(200).json({ success: true, id });
+			db.findById(id.id)
+				.then(user => {
+					res.status(200).json({ success: true, user });
+				})
+				.catch(({ code, message }) => {
+					res.status(code).json({ success: false, message: message });
+				});
 		})
 		.catch(({ code, message }) => {
 			res.status(code).json({ success: false, message });
