@@ -9,6 +9,8 @@ class App extends Component {
 			users: [],
 			name: '',
 			bio: '',
+			id: '',
+			isEditing: false,
 		};
 	}
 
@@ -48,13 +50,33 @@ class App extends Component {
 		});
 	};
 
+	updateUser = (e, user) => {
+		e.preventDefault();
+		console.log('update user');
+		this.setState({
+			name: user.name,
+			bio: user.bio,
+			id: user.id,
+			isEditing: true,
+		});
+	};
+	submitUser = e => {
+		console.log('submitUser');
+		e.preventDefault();
+		// let id = this.state.id;
+		let changed = { name: this.state.name, bio: this.state.bio };
+		axios.put(`http://localhost:5000/api/users/${this.state.id}`, changed).then(res => {
+			console.log('put response', res);
+			axios.get('http://localhost:5000/api/users').then(res => {
+				this.setState({ users: res.data.users });
+			});
+		});
+		this.setState({ isEditing: false });
+	};
 	render() {
 		return (
 			<div className="App">
-				<form
-					onSubmit={e => {
-						this.addUser(e);
-					}}>
+				<form>
 					<input
 						name="name"
 						required
@@ -69,7 +91,12 @@ class App extends Component {
 						placeholder="Bio"
 						onChange={e => this.handleChanges(e)}
 					/>
-					<button>Submit</button>
+					<button
+						onSubmit={e => {
+							this.state.isEditing ? this.submitUser(e) : this.addUser(e);
+						}}>
+						{this.state.isEditing ? 'Submit Edit' : 'Add User'}
+					</button>
 				</form>
 				<div className="users">
 					{this.state.users.map(user => (
@@ -77,6 +104,7 @@ class App extends Component {
 							<h1>{user.name}</h1>
 							<p>{user.bio}</p>
 							<button onClick={e => this.deleteUser(e, user.id)}>Delete</button>
+							<button onClick={e => this.updateUser(e, user)}>Edit</button>
 						</div>
 					))}
 				</div>
